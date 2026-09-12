@@ -57,25 +57,27 @@ pipeline {
             steps{
                 script{
                     withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
-                        sh '''
-                        echo "Checking repository status: "
-                        git status
-                    
-                        echo "Adding changes to git: "
-                        git add .
+                sh '''
+                    echo "Checking repository status:"
+                    git status
 
-                        echo "Commiting changes: "
+                    echo "Adding changes to git:"
+                    git add .
+
+                    if ! git diff --cached --quiet; then
+                        echo "Changes found. Committing changes:"
                         git commit -m "Updated environment variables"
 
-                        echo "Pushing changes to github: "
+                        echo "Pushing changes to GitHub:"
                         git push https://github.com/HussnainAshiq-5657/K8s-Mega-Project-Wanderlust-.git main
-                        
-                    '''
-                    }
-                }
+                    else
+                        echo "No changes to commit"
+                    fi
+                '''
             }
         }
     }
+}
   post {
         success {
             script {
