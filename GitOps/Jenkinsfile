@@ -64,19 +64,12 @@ pipeline {
                         echo "Adding changes to git: "
                         git add .
 
-                        echo "Checking for changes:"
-
-                     if git diff --cached --quiet; then
-                        echo "No changes detected. Skipping commit and push."
-                     else
-                        echo "Changes detected."
-
-                        echo "Committing changes:"
+                        echo "Commiting changes: "
                         git commit -m "Updated environment variables"
 
-                        echo "Pushing changes to GitHub:"
+                        echo "Pushing changes to github: "
                         git push https://github.com/HussnainAshiq-5657/K8s-Mega-Project-Wanderlust-.git main
-                     fi
+                        
                     '''
                     }
                 }
