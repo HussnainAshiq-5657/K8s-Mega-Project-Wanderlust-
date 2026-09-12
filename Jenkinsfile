@@ -2,7 +2,6 @@
 pipeline {
 agent { label 'Node' }
 
-```
 environment {
     SONAR_HOME = tool "Sonar"
 }
