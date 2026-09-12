@@ -1,7 +1,7 @@
 @Library('Shared Library') _
 pipeline {
     agent {label 'Node'}
-    
+   
     parameters {
         string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
         string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
@@ -57,27 +57,24 @@ pipeline {
             steps{
                 script{
                     withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
-                sh '''
-                    echo "Checking repository status:"
-                    git status
-
-                    echo "Adding changes to git:"
-                    git add .
-
-                    if ! git diff --cached --quiet; then
-                        echo "Changes found. Committing changes:"
+                        sh '''
+                        echo "Checking repository status: "
+                        git status
+                    
+                        echo "Adding changes to git: "
+                        git add .
+                        
+                        echo "Commiting changes: "
                         git commit -m "Updated environment variables"
-
-                        echo "Pushing changes to GitHub:"
+                        
+                        echo "Pushing changes to github: "
                         git push https://github.com/HussnainAshiq-5657/K8s-Mega-Project-Wanderlust-.git main
-                    else
-                        echo "No changes to commit"
-                    fi
-                '''
+                    '''
+                    }
+                }
             }
         }
     }
-}
   post {
         success {
             script {
@@ -99,7 +96,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'hussnainaz18@gmail.com',
+            to: 'hussnainnaz18@gmail.com',
             mimeType: 'text/html'
             }
         }
