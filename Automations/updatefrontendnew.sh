@@ -1,7 +1,21 @@
 #!/bin/bash
 
+set -euo pipefail
+
 INSTANCE_ID="i-0bbb6993aa807558f"
-file_to_find="../frontend/.env.docker"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+file_to_find="$PROJECT_DIR/frontend/.env.docker"
+
+echo "Project directory: $PROJECT_DIR"
+echo "Env file: $file_to_find"
+
+if [[ ! -f "$file_to_find" ]]; then
+    echo "ERROR: File not found: $file_to_find"
+    exit 1
+fi
 
 ipv4_address=$(aws ec2 describe-instances \
     --instance-ids "$INSTANCE_ID" \
@@ -13,10 +27,7 @@ if [[ -z "$ipv4_address" || "$ipv4_address" == "None" ]]; then
     exit 1
 fi
 
-if [ ! -f "$file_to_find" ]; then
-    echo "ERROR: File not found: $file_to_find"
-    exit 1
-fi
+echo "EC2 Public IP: $ipv4_address"
 
 sed -i \
     "s|^VITE_API_PATH=.*|VITE_API_PATH=\"http://${ipv4_address}:31100\"|" \

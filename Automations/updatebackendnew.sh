@@ -1,22 +1,36 @@
 #!/bin/bash
 
-# Set the Instance ID and path to the .env file
+set -euo pipefail
+
 INSTANCE_ID="i-0bbb6993aa807558f"
 
-# Retrieve the public IP address of the specified EC2 instance
-ipv4_address=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Path to the .env file
-file_to_find="../backend/.env.docker"
+file_to_find="$PROJECT_DIR/backend/.env.docker"
 
-# Check the current FRONTEND_URL in the .env file
-current_url=$(sed -n "4p" $file_to_find)
+echo "Project directory: $PROJECT_DIR"
+echo "Env file: $file_to_find"
 
-# Update the .env file if the IP address has changed
-if [[ "$current_url" != "FRONTEND_URL=\"http://${ipv4_address}:5173\"" ]]; then
-    if [ -f $file_to_find ]; then
-        sed -i -e "s|FRONTEND_URL.*|FRONTEND_URL=\"http://${ipv4_address}:5173\"|g" $file_to_find
-    else
-        echo "ERROR: File not found."
-    fi
+if [[ ! -f "$file_to_find" ]]; then
+    echo "ERROR: File not found: $file_to_find"
+    exit 1
 fi
+
+ipv4_address=$(aws ec2 describe-instances \
+    --instance-ids "$INSTANCE_ID" \
+    --query 'Reservations[0].Instances[0].PublicIpAddress' \
+    --output text)
+
+if [[ -z "$ipv4_address" || "$ipv4_address" == "None" ]]; then
+    echo "ERROR: Could not retrieve EC2 public IP."
+    exit 1
+fi
+
+echo "EC2 Public IP: $ipv4_address"
+
+sed -i \
+    "s|^FRONTEND_URL=.*|FRONTEND_URL=\"http://${ipv4_address}:5173\"|" \
+    "$file_to_find"
+
+echo "Updated FRONTEND_URL to http://${ipv4_address}:5173"
